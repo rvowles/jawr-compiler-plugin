@@ -1,0 +1,62 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.bluetrainsoftware.parent</groupId>
+    <artifactId>maven-plugin-parent</artifactId>
+    <version>1.4</version>
+  </parent>
+
+  <groupId>com.bluetrainsoftware.maven</groupId>
+  <artifactId>jawr-compiler-maven-plugin</artifactId>
+  <version>1.1-SNAPSHOT</version>
+  <packaging>maven-plugin</packaging>
+
+  <name>Maven JAWR Compiler POM Plugin</name>
+
+  <description>
+    This plugin takes the jawr.properties file from a Servlet3 project, scans
+	  for other servlet3 projects that contain resources, parses the in project
+	  jawr.properties file and turns it into a static representation. It will
+	  also re-write any jsp tags that include jawr references back into proper
+	  source tags.
+  </description>
+
+
+  <scm>
+    <connection>scm:git:git@github.com:rvowles/${artifactId}.git</connection>
+    <developerConnection>scm:git:git@github.com:rvowles/${artifactId}.git</developerConnection>
+    <url>git@github.com:rvowles/${artifactId}.git</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>com.bluetrainsoftware.composite</groupId>
+      <artifactId>composite-maven-plugin</artifactId>
+      <version>[1.1,2)</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.bluetrainsoftware.composite</groupId>
+      <artifactId>composite-groovy</artifactId>
+      <version>[1.1,2)</version>
+    </dependency>
+
+	  <!-- we use the ResourceCollection stuff -->
+	  <dependency>
+		  <groupId>org.eclipse.jetty</groupId>
+		  <artifactId>jetty-util</artifactId>
+		  <version>[9.1.3.v20140225]</version>
+	  </dependency>
+
+    <dependency>
+      <groupId>com.bluetrainsoftware.composite</groupId>
+      <artifactId>composite-unit-test</artifactId>
+      <version>[1,2)</version>
+	    <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+</project>
