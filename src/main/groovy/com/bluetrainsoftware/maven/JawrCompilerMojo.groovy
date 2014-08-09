@@ -13,13 +13,15 @@ import org.apache.maven.project.MavenProject
 import org.eclipse.jetty.util.resource.Resource
 import org.eclipse.jetty.util.resource.ResourceCollection
 
+import java.util.regex.Matcher
+
 /**
  *
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
  */
 @CompileStatic
 @Mojo(name="compile", requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
-class JawrStaticizerMojo extends AbstractMojo {
+class JawrCompilerMojo extends AbstractMojo {
 	@Parameter(required = true, readonly = true, property = "project")
 	protected MavenProject project
 
@@ -66,6 +68,24 @@ class JawrStaticizerMojo extends AbstractMojo {
 		}
 	}
 
+	protected List<Bundle> findLocalBundles(File jawrFile, Properties jawrProperties) {
+		List<Bundle> bundles = []
+
+		def pattern = ~/jawr.(css|js).bundle.(\w+).id=(.*)/
+
+		jawrFile.eachLine { String line ->
+			line = line.trim()
+
+			Matcher match = line =~ pattern
+			if (match.matches()) {
+				List<String> matches = match[0] as List<String>
+				bundles.add(new Bundle(type: matches[1], id:matches[2], name:matches[3], properties: jawrProperties))
+			}
+		}
+
+		return bundles
+	}
+
 	protected void processJawrProperties(File jawrFile) {
 		Properties jawr = new Properties()
 
@@ -84,21 +104,33 @@ class JawrStaticizerMojo extends AbstractMojo {
 			throw new MojoFailureException("JAWR Properties exist but no resources to process them with.")
 		}
 
-		List<Bundle> bundles = []
+		List<Bundle> bundles = findLocalBundles(jawrFile, jawr)
 
-		jawrFile.eachLine { String line ->
-			line = line.trim()
-			if (line.startsWith("#")) { return }
+		if (bundles.size() == 0) {
+			log.info("No bundles in jawr.properties, skipping")
+			return
+		}
 
-			String[] parts = line.tokenize('.')
 
-			if (line.startsWith("jawr.js.bundle.")) {
-				if (parts[4] == 'id') {
-					bundles.add(new Bundle(id:parts[3], properties: jawr))
+		discoverMatchingResources(bundles, resources.allResources)
+	}
+
+	void discoverMatchingResources(List<Bundle> bundles, Collection<Resource> resources) {
+		for(Resource resource : resources) {
+			String name = resource.name
+			int pos = name.indexOf('META-INF/resources/')
+			if (pos > 0) {
+				name = name.substring(pos + 'META-INF/resources/'.length() - 1)
+				log.debug("found ${name}")
+
+				bundles.each { Bundle bundle ->
+					bundle.collectMatchingResources(name, resource)
 				}
-			} else if (line.startsWith("jawr.css.bundle.")) {
-
 			}
+		}
+
+		bundles.each {Bundle bundle ->
+			println "Bundle ${bundle}"
 		}
 	}
 
