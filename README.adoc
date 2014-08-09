@@ -6,7 +6,6 @@ Supports Maven Tiles.
 
 - find the jawr.properties file,
 - load any resources from the servlet3 bundles as if it were a resourcecollection
-- swap plugin to Groovy
 - write out a resolved.jawr.properties file - mapping bundles to gzip'd resources
 - re-write the jsps to remove the <jawr:> references
 - generate-resources phase

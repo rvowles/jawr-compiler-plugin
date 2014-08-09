@@ -5,6 +5,8 @@ import org.codehaus.plexus.util.SelectorUtils
 import org.eclipse.jetty.util.resource.Resource
 import org.eclipse.jetty.util.resource.ResourceCollection
 
+import java.security.MessageDigest
+
 /**
  *
  * @author: Richard Vowles - https://plus.google.com/+RichardVowles
@@ -43,6 +45,27 @@ class Bundle {
 				}
 			}
 		}
+	}
+
+	void writeBundle(File baseDir, boolean nameResources = true) {
+		StringBuilder contents = new StringBuilder()
+
+		// ensure consistent ordering for when we generate our SHA
+		resources.sort({ Resource r1, Resource r2 ->
+			return r1.name.compareTo(r2.name)
+		}).each { Resource resource ->
+			if (nameResources) {
+				contents.append("// ${resource.name}")
+			}
+
+			contents.append(resource.inputStream.text)
+		}
+
+		String finalContents = contents.toString()
+
+		MessageDigest md = MessageDigest.getInstance("SHA-1")
+		byte[] digest = md.digest(finalContents.bytes)
+
 	}
 
 	List<String> findMappingPatterns(String line) {
